@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Truck</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+<?php
+include 'connect_db.php';
+// ... Rest of your PHP and HTML code ...
+
+$conn->close();
+?>
+
+</body>
+</html>
