@@ -96,6 +96,7 @@ CREATE TABLE Shipments (
     Status ENUM('Incoming','Outgoing','Delivered', 'Cancelled'),
     Location ENUM('Entrance','LoadingUnloading','LoadedUnloaded','Delivered'),
     TruckID INT,
+    LicenseNumber VARCHAR(255),
     EntryTime DATETIME,
     CustomerName VARCHAR(255),
     SupplierName VARCHAR(255),
