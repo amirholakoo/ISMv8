@@ -21,6 +21,7 @@ CREATE TABLE RawMaterials (
     SupplierID INT,
     MaterialType VARCHAR(255),
     MaterialName VARCHAR(255),
+    description VARCHAR(255),
     Status VARCHAR(255),
     Comments TEXT
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
