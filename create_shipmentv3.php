@@ -16,11 +16,29 @@ $supplierNameQuery->close();
 
 // Create Shipment
 if (isset($_POST['create_shipment'])) {
-    $licenseNumber = $_POST['license_number'];
+    $truckQuery = $conn->prepare("SELECT LicenseNumber FROM Trucks WHERE TruckID = ?");
+    $truckQuery->bind_param("i", $truckID);
+    $truckQuery->execute();
+    $truckResult = $truckQuery->get_result();
+    $truckRow = $truckResult->fetch_assoc();
+    $licenseNumber = $truckRow['LicenseNumber'];
+    
     $truckID = $_POST['truck_id'];
-    $supplierID = $_POST['supplier_id'];
-    $materialType = $_POST['material_type'];
-    $materialName = $_POST['material_name'];
+    $supplierQuery = $conn->prepare("SELECT SupplierName FROM Suppliers WHERE SupplierID = ?");
+    $supplierQuery->bind_param("i", $supplierID);
+    $supplierQuery->execute();
+    $supplierResult = $supplierQuery->get_result();
+    $supplierRow = $supplierResult->fetch_assoc();
+    $supplierName = $supplierRow['SupplierName'];
+    $materialQuery = $conn->prepare("SELECT SupplierID, MaterialType, MaterialName FROM RawMaterials WHERE MaterialID = ?");
+    $materialQuery->bind_param("i", $materialID);
+    $materialQuery->execute();
+    $materialResult = $materialQuery->get_result();
+    $materialRow = $materialResult->fetch_assoc();
+    $supplierID = $materialRow['SupplierID'];
+    $materialType = $materialRow['MaterialType'];
+    $materialName = $materialRow['MaterialName'];
+
     $shipmentType = $_POST['shipment_type'];
     $entryTime = date("Y-m-d H:i:s");
     $location = 'Entrance';
@@ -28,11 +46,9 @@ if (isset($_POST['create_shipment'])) {
     // Transaction to ensure atomicity
     $conn->begin_transaction();
     try {
-        // Insert into Shipments
-        // Now, insert into Shipments
-$insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, LicenseNumber, TruckID, EntryTime, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-$insertShipment->bind_param("sssissss", $shipmentType, $location, $licenseNumber, $truckID, $entryTime, $supplierName, $materialType, $materialName);
-// Rest of the code
+        /// Insert into Shipments
+        $insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, TruckID, EntryTime, LicenseNumber, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $insertShipment->bind_param("ssisssss", $shipmentType, $location, $truckID, $entryTime, $licenseNumber, $supplierName, $materialType, $materialName);
         $insertShipment->execute();
         $insertShipment->close();
 
