@@ -5,9 +5,19 @@ include 'connect_db.php';
 $trucksQuery = "SELECT TruckID, LicenseNumber FROM Trucks WHERE Status = 'Free'";
 $trucksResult = $conn->query($trucksQuery);
 
-// Fetch Suppliers for Dropdown
-$suppliersQuery = "SELECT SupplierID, SupplierName FROM Suppliers";
-$suppliersResult = $conn->query($suppliersQuery);
+// Fetch SupplierName
+$supplierNameQuery = $conn->prepare("SELECT SupplierName FROM Suppliers WHERE SupplierID = ?");
+$supplierNameQuery->bind_param("i", $supplierID);
+$supplierNameQuery->execute();
+$supplierNameResult = $supplierNameQuery->get_result();
+$supplierRow = $supplierNameResult->fetch_assoc();
+$supplierName = $supplierRow['SupplierName'] ?? ''; // Default to empty string if not found
+$supplierNameQuery->close();
+
+// Now, insert into Shipments
+$insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, TruckID, EntryTime, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$insertShipment->bind_param("ssissss", $shipmentType, $location, $truckID, $entryTime, $supplierName, $materialType, $materialName);
+// Rest of the code
 
 // Create Shipment
 if (isset($_POST['create_shipment'])) {
