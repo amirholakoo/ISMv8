@@ -14,13 +14,9 @@ $supplierRow = $supplierNameResult->fetch_assoc();
 $supplierName = $supplierRow['SupplierName'] ?? ''; // Default to empty string if not found
 $supplierNameQuery->close();
 
-// Now, insert into Shipments
-$insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, TruckID, EntryTime, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, ?, ?, ?)");
-$insertShipment->bind_param("ssissss", $shipmentType, $location, $truckID, $entryTime, $supplierName, $materialType, $materialName);
-// Rest of the code
-
 // Create Shipment
 if (isset($_POST['create_shipment'])) {
+    $licenseNumber = $_POST['license_number'];
     $truckID = $_POST['truck_id'];
     $supplierID = $_POST['supplier_id'];
     $materialType = $_POST['material_type'];
@@ -33,8 +29,10 @@ if (isset($_POST['create_shipment'])) {
     $conn->begin_transaction();
     try {
         // Insert into Shipments
-        $insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, TruckID, EntryTime, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, (SELECT SupplierName FROM Suppliers WHERE SupplierID = ?), ?, ?)");
-        $insertShipment->bind_param("ssisss", $shipmentType, $location, $truckID, $entryTime, $supplierID, $materialType, $materialName);
+        // Now, insert into Shipments
+$insertShipment = $conn->prepare("INSERT INTO Shipments (Status, Location, LicenseNumber, TruckID, EntryTime, SupplierName, MaterialType, MaterialName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+$insertShipment->bind_param("sssissss", $shipmentType, $location, $licenseNumber, $truckID, $entryTime, $supplierName, $materialType, $materialName);
+// Rest of the code
         $insertShipment->execute();
         $insertShipment->close();
 
