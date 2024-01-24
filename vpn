@@ -1,0 +1,10 @@
+[Interface]
+PrivateKey = QOCocwCxmbNKj/Bgf1bCsucQTEKRv3XP/RoE8ipPo18=
+Address = 192.168.109.57/32
+DNS = 8.8.8.8
+MTU = 1420
+
+[Peer]
+PublicKey = WqP1g8cjwNK5/CxUWr8851DO7DHMoZ3UsJP5FdT921M=
+AllowedIPs = 0.0.0.0/1, 128.0.0.0/1, ::/1, 8000::/1
+Endpoint = wg109.wg-vpn.tk:53231
