@@ -7,10 +7,50 @@ $shipmentsResult = $conn->query($shipmentsQuery);
 
 // Handle Form Submission
 if (isset($_POST['create_po'])) {
-    // Extract and sanitize form inputs
-    // Calculate Net Weight, Total Price, and other necessary values
-    // Insert into Purchases and update Shipments and Trucks
-    // Detailed implementation depends on your specific database schema and requirements
+    $shipmentId = $_POST['shipment_id'];
+    $pricePerKg = $_POST['price_per_kg'];
+    $shippingCosts = $_POST['shipping_costs'];
+    $vat = isset($_POST['vat']) ? $_POST['vat'] : 0;
+    $invoiceStatus = $_POST['invoice_status'];
+    $paymentStatus = $_POST['payment_status'];
+    $supplierInvoice = $_POST['supplier_invoice'];
+    $documentInfo = $_POST['document_info'];
+    $comments = $_POST['comments'];
+    $netWeight = $_POST['net_weight'];
+    $unit = $_POST['unit'];
+    $quantity = $_POST['quantity'];
+
+    // Calculate total price
+    $totalPrice = ($pricePerKg * $netWeight) + $shippingCosts;
+    if ($vat > 0) {
+        $totalPrice += $totalPrice * ($vat / 100);
+    }
+
+    // Insert into Purchases
+    $insertPurchaseQuery = "INSERT INTO Purchases (SupplierID, MaterialID, Unit, Quantity, Weight1, Weight2, NetWeight, ShippingCost, VAT, TotalPrice, InvoiceStatus, PaymentStatus, SupplierInvoice, DocumentInfo, Comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $insertPurchase = $conn->prepare($insertPurchaseQuery);
+    // Assuming you have fetched these details earlier
+    $insertPurchase->bind_param("iisiddddssssss", $supplierId, $materialId, $unit, $quantity, $weight1, $weight2, $netWeight, $shippingCosts, $vat, $totalPrice, $invoiceStatus, $paymentStatus, $supplierInvoice, $documentInfo, $comments);
+    $insertPurchase->execute();
+    $purchaseId = $conn->insert_id;
+    $insertPurchase->close();
+
+    // Update Shipments
+    $updateShipmentQuery = "UPDATE Shipments SET Status = 'Delivered', Location = 'Delivered', PricePerKG = ?, ShippingCost = ?, PurchaseID = ?, VAT = ?, InvoiceStatus = ?, PaymentStatus = ?, ExitTime = NOW(), DocumentInfo = ?, Comments = ? WHERE ShipmentID = ?";
+    $updateShipment = $conn->prepare($updateShipmentQuery);
+    $updateShipment->bind_param("ddissssi", $pricePerKg, $shippingCosts, $purchaseId, $vat, $invoiceStatus, $paymentStatus, $documentInfo, $comments, $shipmentId);
+    $updateShipment->execute();
+    $updateShipment->close();
+
+    // Update Trucks
+    // Assuming truck ID is fetched from shipment details
+    $updateTruckQuery = "UPDATE Trucks SET Status = 'Free', Location = 'Entrance' WHERE TruckID = ?";
+    $updateTruck = $conn->prepare($updateTruckQuery);
+    $updateTruck->bind_param("i", $truckId);
+    $updateTruck->execute();
+    $updateTruck->close();
+
+    echo "<p style='color:green;'>Purchase Order created successfully!</p>";
 }
 
 // HTML and JavaScript
