@@ -7,7 +7,15 @@ $shipmentsResult = $conn->query($shipmentsQuery);
 
 // Handle Form Submission
 if (isset($_POST['create_po'])) {
-    $shipmentId = $_POST['shipment_id'];
+
+    // Extract and sanitize form inputs
+    $shipmentId = $_POST['shipment_id']; // Assuming this is the ShipmentID from the Shipments table
+    // Additional form data processing
+    $supplierName = $_POST['supplier_name']; // From the form
+    $materialId = $_POST['material_id']; // From the form
+    $materialType = $_POST['material_type']; // From the form
+    $materialName = $_POST['material_name']; // From the form
+
     $pricePerKg = $_POST['price_per_kg'];
     $shippingCosts = $_POST['shipping_costs'];
     $vat = isset($_POST['vat']) ? $_POST['vat'] : 0;
@@ -27,12 +35,17 @@ if (isset($_POST['create_po'])) {
     }
 
     // Insert into Purchases
-    $insertPurchaseQuery = "INSERT INTO Purchases (SupplierID, MaterialID, Unit, Quantity, Weight1, Weight2, NetWeight, ShippingCost, VAT, TotalPrice, InvoiceStatus, PaymentStatus, SupplierInvoice, DocumentInfo, Comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $insertPurchaseQuery = "INSERT INTO Purchases (Date, SupplierID, TruckID, MaterialID, MaterialType, MaterialName, Unit, Quantity, Weight1, Weight2, NetWeight, ShippingCost, VAT, TotalPrice, InvoiceStatus, PaymentStatus, InvoiceNumber, DocumentInfo, Comments) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $insertPurchase = $conn->prepare($insertPurchaseQuery);
-    // Assuming you have fetched these details earlier
-    $insertPurchase->bind_param("iisiddddssssss", $supplierId, $materialId, $unit, $quantity, $weight1, $weight2, $netWeight, $shippingCosts, $vat, $totalPrice, $invoiceStatus, $paymentStatus, $supplierInvoice, $documentInfo, $comments);
+    // Bind all necessary variables
+    $insertPurchase->bind_param("iiisssiiddiddsssss", $supplierId, $truckId, $materialId, $materialType, $materialName, $unit, $quantity, $weight1, $weight2, $netWeight, $shippingCosts, $vat, $totalPrice, $invoiceStatus, $paymentStatus, $supplierInvoice, $documentInfo, $comments);
     $insertPurchase->execute();
-    $purchaseId = $conn->insert_id;
+    // Check for successful insertion and handle any errors
+    if ($insertPurchase->error) {
+        echo "<p style='color:red;'>Error: " . $insertPurchase->error . "</p>";
+    } else {
+        echo "<p style='color:green;'>Purchase Order created successfully!</p>";
+    }
     $insertPurchase->close();
 
     // Update Shipments
