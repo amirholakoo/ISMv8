@@ -95,7 +95,7 @@ CREATE TABLE Purchases (
 CREATE TABLE Shipments (
     ShipmentID INT AUTO_INCREMENT PRIMARY KEY,
     Status ENUM('Incoming','Outgoing','Delivered', 'Cancelled'),
-    Location ENUM('Entrance','LoadingUnloading','LoadedUnloaded','Delivered'),
+    Location ENUM('Entrance','LoadingUnloading','LoadedUnloaded', 'Office','Delivered'),
     TruckID INT,
     LicenseNumber VARCHAR(255),
     EntryTime DATETIME,
